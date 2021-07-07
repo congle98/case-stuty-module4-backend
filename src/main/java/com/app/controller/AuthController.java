@@ -61,11 +61,16 @@ public class AuthController {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(new JwtResponse(
-                jwt,userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),roles
-        ));
+        if(userDetails.isStatus()){
+            return new ResponseEntity<>(
+                    new JwtResponse(  jwt,userDetails.getId(),
+                    userDetails.getName(),
+                    userDetails.getUsername(),
+                    userDetails.getEmail(),roles),HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>(new MessageResponse("xin lỗi tài khoản đã bị khoá"),HttpStatus.OK);
+        }
 
     }
     @PostMapping("/signup")
@@ -95,6 +100,7 @@ public class AuthController {
         }
         ;
         user.setRoles(roles);
+        user.setName(signUpForm.getName());
         userRepository.save(user);
         return new ResponseEntity<>(new MessageResponse("Create user success!"), HttpStatus.OK);
     }

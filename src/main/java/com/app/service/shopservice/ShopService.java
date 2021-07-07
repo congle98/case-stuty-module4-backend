@@ -1,6 +1,7 @@
 package com.app.service.shopservice;
 
 import com.app.entity.Shop;
+import com.app.entity.User;
 import com.app.repository.ShopRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,5 +29,10 @@ public class ShopService implements IShopService{
     @Override
     public void remove(Long id) {
         shopRepository.deleteById(id);
+    }
+
+    @Override
+    public Iterable<Shop> finAllByUser(User user) {
+        return shopRepository.findAllByUser(user);
     }
 }

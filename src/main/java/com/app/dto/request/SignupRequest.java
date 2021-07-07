@@ -4,10 +4,19 @@ import java.util.Set;
 
 //lấy dữ liệu khi đăng ký
 public class SignupRequest {
+    private String name;
     private String userName;
     private String email;
     private String passWord;
     private Set<String> role;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getUserName() {
         return userName;
