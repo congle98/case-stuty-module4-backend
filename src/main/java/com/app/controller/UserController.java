@@ -120,4 +120,51 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
+
+    @GetMapping("/shops/list")
+    public ResponseEntity<Iterable<Shop>>showAllShop(){
+        List<Shop> shopList = (List<Shop>) shopService.findAll();
+        if(shopList.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(shopList,HttpStatus.OK);
+    }
+
+    @GetMapping("/shops/find/{id}")
+    public ResponseEntity<Shop>findShopById(@PathVariable Long id){
+        Optional<Shop>shopOptional= shopService.findById(id);
+        if(!shopOptional.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(shopOptional.get(),HttpStatus.OK);
+    }
+
+    @PostMapping("/shops/create")
+    public ResponseEntity<Shop>createShop(@RequestBody Shop shop){
+        shopService.save(shop);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/shops/edit/{id}")
+    public ResponseEntity<Shop>editShop(@PathVariable Long id, @RequestBody Shop shop){
+        Optional<Shop>shopOptional = shopService.findById(id);
+        if(!shopOptional.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else {
+            shop.setId(shopOptional.get().getId());
+            shopService.save(shop);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+    }
+
+    @DeleteMapping("/shops/delete/{id}")
+    public ResponseEntity<Shop>deleteShop(@PathVariable Long id){
+        Optional<Shop> shopOptional = shopService.findById(id);
+        if(!shopOptional.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else {
+            shopService.remove(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+    }
 }
