@@ -16,6 +16,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
+@CrossOrigin(origins = "*")
 public class UserController {
     @Autowired
     private ICategoryService categoryService;
@@ -23,22 +24,10 @@ public class UserController {
     @Autowired
     private IShopService shopService;
 
-
-    @ModelAttribute("categories")
-    public Iterable<Category> categories(){
-        return categoryService.findAll();
-    }
-
-    @ModelAttribute("shops")
-    public Iterable<Shop>shops(){
-        return shopService.findAll();
-    }
-
-
     @Autowired
     private IProductService productService;
 
-    @GetMapping("categories/list")
+    @GetMapping("/categories/list")
     public ResponseEntity<Iterable<Category>> showAllCategory(){
         List<Category> categories = (List<Category>) categoryService.findAll();
         if(categories.isEmpty()){
@@ -57,7 +46,7 @@ public class UserController {
     }
 
     @PostMapping("/categories/create")
-    public ResponseEntity createCategory(@RequestBody Category category){
+    public ResponseEntity<Category> createCategory(@RequestBody Category category){
         categoryService.save(category);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -75,20 +64,60 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("categories/delete/{id}")
+    @DeleteMapping("/categories/delete/{id}")
     public ResponseEntity<Category> deleteCategory(@PathVariable Long id) {
         Optional<Category> categoryOptional = categoryService.findById(id);
         if (!categoryOptional.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else {
+            categoryService.remove(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        categoryService.remove(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("products/create")
+    @PostMapping("/products/create")
     public ResponseEntity<Product> createProduct(@RequestBody Product product){
         productService.save(product);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @GetMapping("/products/list")
+    public ResponseEntity<Iterable<Product>> showAllProducts(){
+        List<Product> productList = (List<Product>) productService.findAll();
+        if(productList.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(productList,HttpStatus.OK);
+    }
+
+    @GetMapping("/products/find/{id}")
+    public ResponseEntity<Product> findProductById(@PathVariable Long id){
+        Optional<Product> productOptional = productService.findById(id);
+        if(!productOptional.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(productOptional.get(),HttpStatus.OK);
+    }
+
+    @PutMapping("/products/edit/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product){
+        Optional<Product> productOptional = productService.findById(id);
+        if(!productOptional.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else {
+            product.setId(productOptional.get().getId());
+            productService.save(product);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+    }
+    @DeleteMapping("/products/delete/{id}")
+    public ResponseEntity<Product> deleteProduct(@PathVariable Long id) {
+        Optional<Product> productOptional = productService.findById(id);
+        if (!productOptional.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            productService.remove(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+    }
 }
