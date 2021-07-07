@@ -61,7 +61,7 @@ public class WebSecurityConfig  extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/user/**").permitAll()
                 .antMatchers("/api/admin/**").permitAll()
-                .antMatchers("/","/api/buyer/**").permitAll()
+                .antMatchers("/").permitAll()
                 .anyRequest().authenticated();
 
         //thêm 1 bộ lọng jwt trước khi thực hiện
