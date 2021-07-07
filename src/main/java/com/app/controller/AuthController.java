@@ -76,10 +76,10 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> register(@Valid @RequestBody SignupRequest signUpForm){
         if(userRepository.existsByUserName(signUpForm.getUserName())){
-            return new ResponseEntity<>(new MessageResponse("The username existed! Please try again!"), HttpStatus.OK);
+            return new ResponseEntity<>(new MessageResponse("The username existed! Please try again!"), HttpStatus.NOT_FOUND);
         }
         if(userRepository.existsByEmail(signUpForm.getEmail())){
-            return new ResponseEntity<>(new MessageResponse("The email existed! Please try again"), HttpStatus.OK);
+            return new ResponseEntity<>(new MessageResponse("The email existed! Please try again"), HttpStatus.NOT_FOUND);
         }
         User user = new User(signUpForm.getUserName(), signUpForm.getEmail(),passwordEncoder.encode(signUpForm.getPassWord()));
         Set<String> strRoles = signUpForm.getRole();
