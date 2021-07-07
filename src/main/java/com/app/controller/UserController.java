@@ -1,9 +1,9 @@
 package com.app.controller;
 
-import com.app.entity.Category;
-import com.app.entity.Product;
-import com.app.entity.Shop;
+import com.app.entity.*;
 import com.app.service.categoryservice.ICategoryService;
+import com.app.service.evaluateservice.IEvaluateService;
+import com.app.service.orderdetailservice.IOrderDetailService;
 import com.app.service.productservice.IProductService;
 import com.app.service.shopservice.IShopService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +26,12 @@ public class UserController {
 
     @Autowired
     private IProductService productService;
+
+    @Autowired
+    private IEvaluateService evaluateService;
+
+    @Autowired
+    private IOrderDetailService orderDetailService;
 
     @GetMapping("/categories/list")
     public ResponseEntity<Iterable<Category>> showAllCategory(){
@@ -166,5 +172,97 @@ public class UserController {
             shopService.remove(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+    }
+
+    @GetMapping("/evaluate/list")
+    public ResponseEntity<Iterable<Evaluate>>showAllEvaluate(){
+        List<Evaluate>evaluateList = (List<Evaluate>) evaluateService.findAll();
+        if(evaluateList.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(evaluateList,HttpStatus.OK);
+    }
+
+    @GetMapping("/evaluate/find/{id}")
+    public ResponseEntity<Evaluate>findEvaluateById(@PathVariable Long id){
+        Optional<Evaluate>evaluateOptional = evaluateService.findById(id);
+        if(!evaluateOptional.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(evaluateOptional.get(),HttpStatus.OK);
+    }
+
+    @PostMapping("/evaluate/create")
+    public ResponseEntity<Evaluate>createEvaluate(@RequestBody Evaluate evaluate){
+        evaluateService.save(evaluate);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/evaluate/edit/{id}")
+    public ResponseEntity<Evaluate>updateEvaluate(@PathVariable Long id,@RequestBody Evaluate evaluate){
+        Optional<Evaluate>evaluateOptional = evaluateService.findById(id);
+        if(!evaluateOptional.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else {
+            evaluate.setId(evaluateOptional.get().getId());
+            evaluateService.save(evaluate);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+    }
+    @DeleteMapping("evaluate/delete/{id}")
+    public ResponseEntity<Evaluate>deleteEvaluate(@PathVariable Long id){
+        Optional<Evaluate>evaluateOptional = evaluateService.findById(id);
+        if(!evaluateOptional.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else {
+            evaluateService.remove(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+    }
+
+    @GetMapping("/orderdetail/list")
+    public ResponseEntity<Iterable<OrderDetail>>showAllOrderDetail(){
+        List<OrderDetail> orderDetailList = (List<OrderDetail>) orderDetailService.findAll();
+        if(orderDetailList.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(orderDetailList,HttpStatus.OK);
+    }
+
+    @GetMapping("/orderdetail/find/{id}")
+    public ResponseEntity<OrderDetail>findOrderDetailById(@PathVariable Long id){
+        Optional<OrderDetail> optionalOrderDetail = orderDetailService.findById(id);
+        if(!optionalOrderDetail.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(optionalOrderDetail.get(),HttpStatus.OK);
+    }
+
+    @PostMapping("/orderdetail/create")
+    public ResponseEntity<OrderDetail> createOD(@RequestBody OrderDetail orderDetail){
+        orderDetailService.save(orderDetail);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PutMapping("/orderdetail/edit/{id}")
+    private ResponseEntity<OrderDetail>editOD(@PathVariable Long id, @RequestBody OrderDetail orderDetail){
+        Optional<OrderDetail>optionalOrderDetail = orderDetailService.findById(id);
+        if(!optionalOrderDetail.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else {
+            orderDetail.setId(optionalOrderDetail.get().getId());
+            orderDetailService.save(orderDetail);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+    }
+
+    @DeleteMapping("/orderdetail/delete/{id}")
+    private ResponseEntity<OrderDetail>deleteOD(@PathVariable Long id){
+        Optional<OrderDetail>optionalOrderDetail = orderDetailService.findById(id);
+        if(!optionalOrderDetail.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        orderDetailService.remove(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

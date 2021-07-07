@@ -5,7 +5,7 @@ import javax.validation.constraints.Max;
 
 @Entity
 @Table(name = "rates")
-public class Rate {
+public class Evaluate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
