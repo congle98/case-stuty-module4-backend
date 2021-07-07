@@ -9,10 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,23 +25,43 @@ public class AdminController {
     @Autowired
     private IUserService userService;
 
+
+
     @GetMapping("/users")
-    public ResponseEntity<?> findAllUser(){
+    public ResponseEntity<?> findAll(){
+
+        return new ResponseEntity<>(findAllUser(), HttpStatus.OK);
+    }
+
+    public List<UserDto> findAllUser(){
         List<User> userList = (List<User>) userService.findAll();
         List<UserDto> userDtoList = new ArrayList<>();
         for (User user: userList
-             ) {
+        ) {
             List<Role> roleList = user.getRoles().stream().collect(Collectors.toList());
             for (Role role: roleList
-                 ) {
+            ) {
                 if(role.getName().equals("ROLE_USER")){
                     userDtoList.add(appMapper.userAppToDto(user));
                 }
             }
         }
-        System.out.println(userDtoList);
-        return new ResponseEntity<>(userDtoList, HttpStatus.OK);
+        return userDtoList;
     }
+
+    @PutMapping("/users")
+    public ResponseEntity<?> changeStatus(@RequestBody String userName){
+        Optional<User> user = userService.findByUserName(userName);
+        if(user.get().isStatus()){
+            user.get().setStatus(false);
+        }
+        else{
+            user.get().setStatus(true);
+        }
+        userService.save(user.get());
+        return new ResponseEntity<>(findAllUser(), HttpStatus.OK);
+    }
+
 
 
 }

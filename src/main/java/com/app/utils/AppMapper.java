@@ -18,7 +18,7 @@ public class AppMapper {
     public  UserDto userAppToDto(User user){
         UserDto userDto = new UserDto();
         userDto.setUserName(user.getUserName());
-        userDto.setEmail(user.getUserName());
+        userDto.setEmail(user.getEmail());
         userDto.setName(user.getName());
         if(user.getAddress()==null){
             userDto.setAddress("không xác định");
