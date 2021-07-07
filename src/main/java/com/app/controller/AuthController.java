@@ -10,7 +10,7 @@ import com.app.entity.User;
 import com.app.repository.RoleRepository;
 import com.app.repository.UserRepository;
 
-import com.app.service.UserDetailsImpl;
+import com.app.service.userdetailservice.UserDetailsImpl;
 
 import com.app.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,6 @@
 package com.app.security;
 
-import com.app.service.UserDetailsServiceImpl;
+import com.app.service.userdetailservice.UserDetailsServiceImpl;
 import com.app.utils.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,7 +2,7 @@ package com.app.configs;
 
 import com.app.security.AuthEntryPointJwt;
 import com.app.security.AuthTokenFilter;
-import com.app.service.UserDetailsServiceImpl;
+import com.app.service.userdetailservice.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -61,7 +61,7 @@ public class WebSecurityConfig  extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/user/**").permitAll()
                 .antMatchers("/api/admin/**").permitAll()
-                .antMatchers("/").permitAll()
+                .antMatchers("/","/api/buyer/**").permitAll()
                 .anyRequest().authenticated();
 
         //thêm 1 bộ lọng jwt trước khi thực hiện
