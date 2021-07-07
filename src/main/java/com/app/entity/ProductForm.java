@@ -1,30 +1,14 @@
 package com.app.entity;
 
-import javax.persistence.*;
+import org.springframework.web.multipart.MultipartFile;
 
-@Entity
-@Table(name = "products")
-public class Product {
-    @Id
-    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+public class ProductForm {
     private Long id;
-
     private String name;
-
     private double price;
-
     private double salePrice;
-
-    private String avatar;
-
-    @ManyToOne
-    @JoinColumn(name = "category_id")
+    private MultipartFile avatar;
     private Category category;
-
-    @ManyToOne
-    @JoinColumn(name = "shop_id")
-
-
     private Shop shop;
 
     public Long getId() {
@@ -59,11 +43,11 @@ public class Product {
         this.salePrice = salePrice;
     }
 
-    public String getAvatar() {
+    public MultipartFile getAvatar() {
         return avatar;
     }
 
-    public void setAvatar(String avatar) {
+    public void setAvatar(MultipartFile avatar) {
         this.avatar = avatar;
     }
 
