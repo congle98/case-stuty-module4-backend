@@ -1,2 +1,4 @@
-package com.app.repository;public interface OrderRepository {
+package com.app.repository;
+
+public interface OrderRepository {
 }
