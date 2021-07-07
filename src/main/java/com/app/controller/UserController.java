@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/user")
-@CrossOrigin(origins = "*")
+
 public class UserController {
     @Autowired
     private ICategoryService categoryService;
