@@ -1,6 +1,7 @@
 package com.app.service.productservice;
 
 import com.app.dto.ProductForm;
+import com.app.entity.Category;
 import com.app.entity.Product;
 import com.app.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,8 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public void save(Product product) {
-        productRepository.save(product);
+    public Product save(Product product) {
+        return productRepository.save(product);
     }
 
     @Override
@@ -57,5 +58,10 @@ public class ProductService implements IProductService {
         product.setCategory(productForm.getCategory());
         product.setShop(productForm.getShop());
         return product;
+    }
+
+    @Override
+    public Iterable<Product> findAllByCategory(Category category) {
+        return productRepository.findAllByCategory(category);
     }
 }

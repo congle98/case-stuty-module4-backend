@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/home")
 @CrossOrigin(origins = "*")
 public class HomeController {
@@ -45,6 +46,15 @@ public class HomeController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(categories, HttpStatus.OK);
+    }
+    @GetMapping("/categories/finAllByCategory")
+    public ResponseEntity<?> findAllByCategory(@RequestBody String categoryName){
+        Optional<Category> category = categoryService.findByName(categoryName);
+        System.out.println(category);
+        Iterable<Product> products = productService.findAllByCategory(category.get());
+        System.out.println(products);
+
+        return new ResponseEntity<>((List<Product>)products,HttpStatus.OK);
     }
 
     @GetMapping("/categories/find/{id}")

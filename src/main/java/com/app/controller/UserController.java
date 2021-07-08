@@ -1,6 +1,7 @@
 package com.app.controller;
 
 import com.app.dto.ProductForm;
+import com.app.dto.request.CreateCartRequest;
 import com.app.entity.*;
 import com.app.service.categoryservice.ICategoryService;
 import com.app.service.evaluateservice.IEvaluateService;
@@ -8,17 +9,19 @@ import com.app.service.orderdetailservice.IOrderDetailService;
 import com.app.service.orderservice.IOrderService;
 import com.app.service.productservice.IProductService;
 import com.app.service.shopservice.IShopService;
+import com.app.service.userservice.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/user")
 @CrossOrigin(origins = "*")
+@RequestMapping("/api/user")
 public class UserController {
     @Autowired
     private ICategoryService categoryService;
@@ -37,6 +40,9 @@ public class UserController {
 
     @Autowired
     private IOrderService orderService;
+
+    @Autowired
+    private IUserService userService;
 
 
     @PostMapping("/categories/create")
@@ -99,6 +105,7 @@ public class UserController {
     }
 
 
+
     @PostMapping("/shops/create")
     public ResponseEntity<Shop>createShop(@RequestBody Shop shop){
         shopService.save(shop);
@@ -158,10 +165,55 @@ public class UserController {
     }
 
 
+
     @PostMapping("/orderdetail/create")
-    public ResponseEntity<OrderDetail> createOD(@RequestBody OrderDetail orderDetail){
-        orderDetailService.save(orderDetail);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<?> createOD(@RequestBody CreateCartRequest createCartRequest){
+        System.out.println(createCartRequest);
+        Optional<User> user = userService.findByUserName(createCartRequest.getUserName());
+        List<Order> orders = (List<Order>) orderService.findAllByUser(user.get());
+        Optional<Product> product = productService.findById(Long.valueOf(createCartRequest.getProductId()));
+        OrderDetail orderDetail = new OrderDetail();
+        orderDetail.setProduct(product.get());
+        orderDetail.setQuantity(1);
+        if(!orders.isEmpty()){
+            boolean checkCreateNewOrder = true;
+            for (Order o:orders
+                 ) {
+                if(o.getStatus().equals("Giỏ hàng")){
+                    checkCreateNewOrder = false;
+                    orderDetail.setOrder(o);
+                    orderDetailService.save(orderDetail);
+                    Optional<Order> orderRespon = orderService.findById(o.getId());
+                    return new ResponseEntity<>(orderRespon.get(),HttpStatus.CREATED);
+                }
+            }
+            if (checkCreateNewOrder==true){
+                Order order = orderService.save(createOrder(createCartRequest.getUserName()));
+                orderDetail.setOrder(order);
+                orderDetailService.save(orderDetail);
+                Optional<Order> orderRespon = orderService.findById(order.getId());
+                return new ResponseEntity<>(orderRespon.get(),HttpStatus.CREATED);
+            }
+        }
+        else {
+            Order order = orderService.save(createOrder(createCartRequest.getUserName()));
+            orderDetail.setOrder(order);
+            orderDetailService.save(orderDetail);
+            Optional<Order> orderRespon = orderService.findById(order.getId());
+            return new ResponseEntity<>(orderRespon.get(),HttpStatus.CREATED);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+    }
+
+    private Order createOrder(String userName){
+        Optional<User> user = userService.findByUserName(userName);
+        Order order = new Order();
+        order.setUser(user.get());
+        order.setAddress("chưa xác định");
+        order.setCreateTime(new Date(System.currentTimeMillis()));
+        order.setStatus("Giỏ hàng");
+        return order;
     }
 
     @PutMapping("/orderdetail/edit/{id}")
@@ -212,5 +264,19 @@ public class UserController {
         }
         orderService.remove(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    @GetMapping("/findOrderByUser/{userName}")
+    public ResponseEntity<?> findOrderByUser(@PathVariable String userName){
+        Optional<User> user = userService.findByUserName(userName);
+        Iterable<Order> orders = orderService.findAllByUser(user.get());
+        Order order = new Order();
+        for (Order o: orders
+             ) {
+            if(o.getStatus().equals("Giỏ hàng")){
+                order = o;
+            }
+        }
+        Iterable<OrderDetail> orderDetails = orderDetailService.findAllByOrder(order);
+        return new ResponseEntity<>(orderDetails,HttpStatus.OK);
     }
 }
