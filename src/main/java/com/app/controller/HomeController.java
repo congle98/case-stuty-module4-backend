@@ -4,6 +4,7 @@ import com.app.entity.*;
 import com.app.service.categoryservice.ICategoryService;
 import com.app.service.evaluateservice.IEvaluateService;
 import com.app.service.orderdetailservice.IOrderDetailService;
+import com.app.service.orderservice.IOrderService;
 import com.app.service.productservice.IProductService;
 import com.app.service.shopservice.IShopService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public class HomeController {
 
     @Autowired
     private IOrderDetailService orderDetailService;
+
+    @Autowired
+    private IOrderService orderService;
 
     @GetMapping("/categories/list")
     public ResponseEntity<Iterable<Category>> showAllCategory() {
@@ -122,6 +126,24 @@ public class HomeController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(optionalOrderDetail.get(),HttpStatus.OK);
+    }
+
+    @GetMapping("/orders/list")
+    public ResponseEntity<Iterable<Order>>showAllOrder(){
+        List<Order>orderList = (List<Order>) orderService.findAll();
+        if(orderList.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(orderList,HttpStatus.OK);
+    }
+
+    @GetMapping("/orders/find/{id}")
+    public ResponseEntity<Order>findOrderById(@PathVariable Long id){
+        Optional<Order>orderOptional = orderService.findById(id);
+        if(!orderOptional.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(orderOptional.get(),HttpStatus.OK);
     }
 }
 

@@ -4,6 +4,7 @@ import com.app.entity.*;
 import com.app.service.categoryservice.ICategoryService;
 import com.app.service.evaluateservice.IEvaluateService;
 import com.app.service.orderdetailservice.IOrderDetailService;
+import com.app.service.orderservice.IOrderService;
 import com.app.service.productservice.IProductService;
 import com.app.service.shopservice.IShopService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ public class UserController {
 
     @Autowired
     private IOrderDetailService orderDetailService;
+
+    @Autowired
+    private IOrderService orderService;
 
 //    @GetMapping("/categories/list")
 //    public ResponseEntity<Iterable<Category>> showAllCategory(){
@@ -86,24 +90,6 @@ public class UserController {
         productService.save(product);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
-//    @GetMapping("/products/list")
-//    public ResponseEntity<Iterable<Product>> showAllProducts(){
-//        List<Product> productList = (List<Product>) productService.findAll();
-//        if(productList.isEmpty()){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//        return new ResponseEntity<>(productList,HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/products/find/{id}")
-//    public ResponseEntity<Product> findProductById(@PathVariable Long id){
-//        Optional<Product> productOptional = productService.findById(id);
-//        if(!productOptional.isPresent()){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//        return new ResponseEntity<>(productOptional.get(),HttpStatus.OK);
-//    }
 
     @PutMapping("/products/edit/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product){
@@ -245,7 +231,7 @@ public class UserController {
     }
 
     @PutMapping("/orderdetail/edit/{id}")
-    private ResponseEntity<OrderDetail>editOD(@PathVariable Long id, @RequestBody OrderDetail orderDetail){
+    public ResponseEntity<OrderDetail>editOD(@PathVariable Long id, @RequestBody OrderDetail orderDetail){
         Optional<OrderDetail>optionalOrderDetail = orderDetailService.findById(id);
         if(!optionalOrderDetail.isPresent()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -257,12 +243,40 @@ public class UserController {
     }
 
     @DeleteMapping("/orderdetail/delete/{id}")
-    private ResponseEntity<OrderDetail>deleteOD(@PathVariable Long id){
+    public ResponseEntity<OrderDetail>deleteOD(@PathVariable Long id){
         Optional<OrderDetail>optionalOrderDetail = orderDetailService.findById(id);
         if(!optionalOrderDetail.isPresent()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         orderDetailService.remove(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/orders/create")
+    public ResponseEntity<Order>createOrder(@RequestBody Order order){
+        orderService.save(order);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PutMapping("/orders/edit/{id}")
+    public ResponseEntity<Order>updateOrder(@PathVariable Long id, @RequestBody Order order){
+        Optional<Order> orderOptional = orderService.findById(id);
+        if(!orderOptional.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else {
+            order.setId(orderOptional.get().getId());
+            orderService.save(order);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+    }
+
+    @DeleteMapping("/orders/delete/{id}")
+    public ResponseEntity<Order>deleteOrder(@PathVariable Long id){
+        Optional<Order>orderOptional=orderService.findById(id);
+        if(!orderOptional.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        orderService.remove(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
