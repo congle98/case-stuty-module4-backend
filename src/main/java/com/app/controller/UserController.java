@@ -1,5 +1,6 @@
 package com.app.controller;
 
+import com.app.dto.request.CreateCartRequest;
 import com.app.entity.*;
 import com.app.service.categoryservice.ICategoryService;
 import com.app.service.evaluateservice.IEvaluateService;
@@ -7,11 +8,13 @@ import com.app.service.orderdetailservice.IOrderDetailService;
 import com.app.service.orderservice.IOrderService;
 import com.app.service.productservice.IProductService;
 import com.app.service.shopservice.IShopService;
+import com.app.service.userservice.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,23 +40,9 @@ public class UserController {
     @Autowired
     private IOrderService orderService;
 
-//    @GetMapping("/categories/list")
-//    public ResponseEntity<Iterable<Category>> showAllCategory(){
-//        List<Category> categories = (List<Category>) categoryService.findAll();
-//        if(categories.isEmpty()){
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        }
-//        return new ResponseEntity<>(categories,HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/categories/find/{id}")
-//    public ResponseEntity<Category> findCategoryById(@PathVariable Long id){
-//        Optional<Category> categoryOptional = categoryService.findById(id);
-//        if(!categoryOptional.isPresent()){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//        return new ResponseEntity<>(categoryOptional.get(),HttpStatus.OK);
-//    }
+    @Autowired
+    private IUserService userService;
+
 
     @PostMapping("/categories/create")
     public ResponseEntity<Category> createCategory(@RequestBody Category category){
@@ -113,23 +102,7 @@ public class UserController {
         }
     }
 
-//    @GetMapping("/shops/list")
-//    public ResponseEntity<Iterable<Shop>>showAllShop(){
-//        List<Shop> shopList = (List<Shop>) shopService.findAll();
-//        if(shopList.isEmpty()){
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        }
-//        return new ResponseEntity<>(shopList,HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/shops/find/{id}")
-//    public ResponseEntity<Shop>findShopById(@PathVariable Long id){
-//        Optional<Shop>shopOptional= shopService.findById(id);
-//        if(!shopOptional.isPresent()){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//        return new ResponseEntity<>(shopOptional.get(),HttpStatus.OK);
-//    }
+
 
     @PostMapping("/shops/create")
     public ResponseEntity<Shop>createShop(@RequestBody Shop shop){
@@ -160,23 +133,6 @@ public class UserController {
         }
     }
 
-//    @GetMapping("/evaluate/list")
-//    public ResponseEntity<Iterable<Evaluate>>showAllEvaluate(){
-//        List<Evaluate>evaluateList = (List<Evaluate>) evaluateService.findAll();
-//        if(evaluateList.isEmpty()){
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        }
-//        return new ResponseEntity<>(evaluateList,HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/evaluate/find/{id}")
-//    public ResponseEntity<Evaluate>findEvaluateById(@PathVariable Long id){
-//        Optional<Evaluate>evaluateOptional = evaluateService.findById(id);
-//        if(!evaluateOptional.isPresent()) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//        return new ResponseEntity<>(evaluateOptional.get(),HttpStatus.OK);
-//    }
 
     @PostMapping("/evaluate/create")
     public ResponseEntity<Evaluate>createEvaluate(@RequestBody Evaluate evaluate){
@@ -206,28 +162,56 @@ public class UserController {
         }
     }
 
-//    @GetMapping("/orderdetail/list")
-//    public ResponseEntity<Iterable<OrderDetail>>showAllOrderDetail(){
-//        List<OrderDetail> orderDetailList = (List<OrderDetail>) orderDetailService.findAll();
-//        if(orderDetailList.isEmpty()){
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        }
-//        return new ResponseEntity<>(orderDetailList,HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/orderdetail/find/{id}")
-//    public ResponseEntity<OrderDetail>findOrderDetailById(@PathVariable Long id){
-//        Optional<OrderDetail> optionalOrderDetail = orderDetailService.findById(id);
-//        if(!optionalOrderDetail.isPresent()){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//        return new ResponseEntity<>(optionalOrderDetail.get(),HttpStatus.OK);
-//    }
+
 
     @PostMapping("/orderdetail/create")
-    public ResponseEntity<OrderDetail> createOD(@RequestBody OrderDetail orderDetail){
-        orderDetailService.save(orderDetail);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<?> createOD(@RequestBody CreateCartRequest createCartRequest){
+        System.out.println(createCartRequest);
+        Optional<User> user = userService.findByUserName(createCartRequest.getUserName());
+        List<Order> orders = (List<Order>) orderService.findAllByUser(user.get());
+        Optional<Product> product = productService.findById(Long.valueOf(createCartRequest.getProductId()));
+        OrderDetail orderDetail = new OrderDetail();
+        orderDetail.setProduct(product.get());
+        orderDetail.setQuantity(1);
+        if(!orders.isEmpty()){
+            boolean checkCreateNewOrder = true;
+            for (Order o:orders
+                 ) {
+                if(o.getStatus().equals("Giỏ hàng")){
+                    checkCreateNewOrder = false;
+                    orderDetail.setOrder(o);
+                    orderDetailService.save(orderDetail);
+                    Optional<Order> orderRespon = orderService.findById(o.getId());
+                    return new ResponseEntity<>(orderRespon.get(),HttpStatus.CREATED);
+                }
+            }
+            if (checkCreateNewOrder==true){
+                Order order = orderService.save(createOrder(createCartRequest.getUserName()));
+                orderDetail.setOrder(order);
+                orderDetailService.save(orderDetail);
+                Optional<Order> orderRespon = orderService.findById(order.getId());
+                return new ResponseEntity<>(orderRespon.get(),HttpStatus.CREATED);
+            }
+        }
+        else {
+            Order order = orderService.save(createOrder(createCartRequest.getUserName()));
+            orderDetail.setOrder(order);
+            orderDetailService.save(orderDetail);
+            Optional<Order> orderRespon = orderService.findById(order.getId());
+            return new ResponseEntity<>(orderRespon.get(),HttpStatus.CREATED);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+    }
+
+    private Order createOrder(String userName){
+        Optional<User> user = userService.findByUserName(userName);
+        Order order = new Order();
+        order.setUser(user.get());
+        order.setAddress("chưa xác định");
+        order.setCreateTime(new Date(System.currentTimeMillis()));
+        order.setStatus("Giỏ hàng");
+        return order;
     }
 
     @PutMapping("/orderdetail/edit/{id}")

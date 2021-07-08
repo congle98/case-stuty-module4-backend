@@ -21,8 +21,8 @@ public class EvaluateService implements IEvaluateService{
     }
 
     @Override
-    public void save(Evaluate evaluate) {
-        evaluateRepository.save(evaluate);
+    public Evaluate save(Evaluate evaluate) {
+        return evaluateRepository.save(evaluate);
     }
 
     @Override
