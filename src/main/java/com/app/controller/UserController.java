@@ -2,6 +2,7 @@ package com.app.controller;
 
 import com.app.dto.ProductForm;
 import com.app.dto.request.CreateCartRequest;
+import com.app.dto.request.CreateCartRequest;
 import com.app.entity.*;
 import com.app.service.categoryservice.ICategoryService;
 import com.app.service.evaluateservice.IEvaluateService;
@@ -20,8 +21,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/api/user")
+@CrossOrigin(origins = "*")
 public class UserController {
     @Autowired
     private ICategoryService categoryService;
