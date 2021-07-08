@@ -19,9 +19,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/user")
-
 public class UserController {
     @Autowired
     private ICategoryService categoryService;
@@ -263,5 +262,19 @@ public class UserController {
         }
         orderService.remove(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    @GetMapping("/findOrderByUser/{userName}")
+    public ResponseEntity<?> findOrderByUser(@PathVariable String userName){
+        Optional<User> user = userService.findByUserName(userName);
+        Iterable<Order> orders = orderService.findAllByUser(user.get());
+        Order order = new Order();
+        for (Order o: orders
+             ) {
+            if(o.getStatus().equals("Giỏ hàng")){
+                order = o;
+            }
+        }
+        Iterable<OrderDetail> orderDetails = orderDetailService.findAllByOrder(order);
+        return new ResponseEntity<>(orderDetails,HttpStatus.OK);
     }
 }
