@@ -80,4 +80,17 @@ public class Product {
     public void setShop(Shop shop) {
         this.shop = shop;
     }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", salePrice=" + salePrice +
+                ", avatar='" + avatar + '\'' +
+                ", category=" + category +
+                ", shop=" + shop +
+                '}';
+    }
 }

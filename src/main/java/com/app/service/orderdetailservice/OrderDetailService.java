@@ -1,5 +1,6 @@
 package com.app.service.orderdetailservice;
 
+import com.app.entity.Order;
 import com.app.entity.OrderDetail;
 import com.app.repository.OrderDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,17 @@ public class OrderDetailService implements IOrderDetailService {
     }
 
     @Override
-    public void save(OrderDetail orderDetail) {
-        orderDetailRepository.save(orderDetail);
+    public OrderDetail save(OrderDetail orderDetail) {
+        return orderDetailRepository.save(orderDetail);
     }
 
     @Override
     public void remove(Long id) {
         orderDetailRepository.deleteById(id);
+    }
+
+    @Override
+    public Iterable<OrderDetail> findAllByOrder(Order order) {
+        return orderDetailRepository.findAllByOrder(order);
     }
 }
