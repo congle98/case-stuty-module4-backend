@@ -41,4 +41,9 @@ public class ProductService implements IProductService {
     public Product converter(ProductForm productForm) {
         return null;
     }
+
+    @Override
+    public Iterable<Product> findAllByCategory(Category category) {
+        return productRepository.findAllByCategory(category);
+    }
 }

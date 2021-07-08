@@ -1,5 +1,7 @@
 package com.app.controller;
 
+import com.app.dto.ProductForm;
+import com.app.dto.request.CreateCartRequest;
 import com.app.dto.request.CreateCartRequest;
 import com.app.entity.*;
 import com.app.service.categoryservice.ICategoryService;
@@ -19,9 +21,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/user")
-
+@CrossOrigin(origins = "*")
 public class UserController {
     @Autowired
     private ICategoryService categoryService;
@@ -76,7 +77,8 @@ public class UserController {
     }
 
     @PostMapping("/products/create")
-    public ResponseEntity<Product> createProduct(@RequestBody Product product){
+    public ResponseEntity<Product> createProduct(@RequestBody ProductForm productForm){
+        Product product = productService.converter(productForm);
         productService.save(product);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -263,5 +265,19 @@ public class UserController {
         }
         orderService.remove(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    @GetMapping("/findOrderByUser/{userName}")
+    public ResponseEntity<?> findOrderByUser(@PathVariable String userName){
+        Optional<User> user = userService.findByUserName(userName);
+        Iterable<Order> orders = orderService.findAllByUser(user.get());
+        Order order = new Order();
+        for (Order o: orders
+             ) {
+            if(o.getStatus().equals("Giỏ hàng")){
+                order = o;
+            }
+        }
+        Iterable<OrderDetail> orderDetails = orderDetailService.findAllByOrder(order);
+        return new ResponseEntity<>(orderDetails,HttpStatus.OK);
     }
 }

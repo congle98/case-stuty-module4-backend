@@ -37,5 +37,4 @@ public class CategoryService implements ICategoryService{
     public Optional<Category> findByName(String name) {
         return categoryRepository.findByName(name);
     }
-
 }
