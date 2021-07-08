@@ -1,6 +1,6 @@
 package com.app.utils;
 
-import com.app.service.UserDetailsImpl;
+import com.app.service.userdetailservice.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

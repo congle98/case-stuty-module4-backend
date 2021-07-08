@@ -16,7 +16,7 @@ public class Shop {
     private String avatar;
 
     @Column(columnDefinition = "boolean default true")
-    private boolean status;
+    private boolean status = true;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

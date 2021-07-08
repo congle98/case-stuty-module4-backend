@@ -1,4 +1,4 @@
-package com.app.service;
+package com.app.service.userdetailservice;
 
 import com.app.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -6,7 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,21 +15,43 @@ public class UserDetailsImpl implements UserDetails {
 
     private Long id;
 
+    private String name;
+
     private String userName;
 
     private String email;
+
+    private boolean status;
 
     @JsonIgnore
     private String passWord;
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(Long id, String userName, String email, String passWord, Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailsImpl(Long id,String name,boolean status, String userName, String email, String passWord, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.userName = userName;
         this.email = email;
         this.passWord = passWord;
         this.authorities = authorities;
+        this.name = name;
+        this.status = status;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public static UserDetailsImpl build(User user){
@@ -39,6 +60,8 @@ public class UserDetailsImpl implements UserDetails {
 
         return new UserDetailsImpl(
                 user.getId(),
+                user.getName(),
+                user.isStatus(),
                 user.getUserName(),
                 user.getEmail(),
                 user.getPassword(),
