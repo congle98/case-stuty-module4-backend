@@ -42,8 +42,5 @@ public class ProductService implements IProductService {
         return null;
     }
 
-    @Override
-    public Iterable<Product> findAllByCategory(Category category) {
-        return productRepository.findAllByCategory(category);
-    }
+
 }
