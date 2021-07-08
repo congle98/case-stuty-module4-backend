@@ -1,5 +1,6 @@
 package com.app.service.productservice;
 
+import com.app.dto.ProductForm;
 import com.app.entity.Category;
 import com.app.entity.Product;
 import com.app.repository.ProductRepository;
@@ -34,5 +35,10 @@ public class ProductService implements IProductService {
     @Override
     public Iterable<Product> findAllByCategory(Category category) {
         return productRepository.findAllByCategory(category);
+    }
+
+    @Override
+    public Product converter(ProductForm productForm) {
+        return null;
     }
 }
