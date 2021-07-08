@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "*", maxAge = 3600)
+
 @RequestMapping("/api/home")
 @CrossOrigin(origins = "*")
 public class HomeController {
