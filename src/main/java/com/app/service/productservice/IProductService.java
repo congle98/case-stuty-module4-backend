@@ -5,8 +5,13 @@ import com.app.dto.ProductForm;
 import com.app.entity.Product;
 import com.app.service.IGeneralService;
 
+import java.util.List;
+
 public interface IProductService extends IGeneralService<Product> {
-     Iterable<Product> findAllByCategory(Category category);
+    Iterable<Product> findAllByCategory(Category category);
+    Iterable<Product> searchByName(String name);
+    Iterable<Product> findProductByShop(Long id);
+
      Product converter(ProductForm productForm);
      Iterable<Product> findAllProductByName(String name);
 }

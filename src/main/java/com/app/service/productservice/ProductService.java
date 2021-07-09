@@ -45,6 +45,16 @@ public class ProductService implements IProductService {
     }
 
     @Override
+    public Iterable<Product> searchByName(String name) {
+        return productRepository.findByNameContaining(name);
+    }
+
+    @Override
+    public Iterable<Product> findProductByShop(Long id) {
+        return productRepository.findProductByShop_Id(id);
+    }
+
+    @Override
     public Product converter(ProductForm productForm) {
 
         MultipartFile multipartFile = productForm.getAvatar();
