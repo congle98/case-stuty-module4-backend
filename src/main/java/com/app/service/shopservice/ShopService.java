@@ -6,6 +6,7 @@ import com.app.repository.ShopRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 @Service
 public class ShopService implements IShopService{
@@ -34,5 +35,13 @@ public class ShopService implements IShopService{
     @Override
     public Iterable<Shop> finAllByUser(User user) {
         return shopRepository.findAllByUser(user);
+    }
+    @Override
+    public Iterable<Shop> searchByName(String name){
+        return shopRepository.findByNameContaining(name);
+    }
+    @Override
+    public List<Shop> findShopByUser_Id(Long id) {
+        return shopRepository.findShopByUser_Id(id);
     }
 }

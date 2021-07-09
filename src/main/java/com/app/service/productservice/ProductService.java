@@ -35,4 +35,14 @@ public class ProductService implements IProductService {
     public Iterable<Product> findAllByCategory(Category category) {
         return productRepository.findAllByCategory(category);
     }
+
+    @Override
+    public Iterable<Product> searchByName(String name) {
+        return productRepository.findByNameContaining(name);
+    }
+
+    @Override
+    public Iterable<Product> findProductByShop(Long id) {
+        return productRepository.findProductByShop_Id(id);
+    }
 }

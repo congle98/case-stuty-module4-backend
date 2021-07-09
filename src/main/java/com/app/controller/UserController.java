@@ -1,6 +1,7 @@
 package com.app.controller;
 
 import com.app.dto.request.CreateCartRequest;
+import com.app.dto.SearchDto;
 import com.app.entity.*;
 import com.app.service.categoryservice.ICategoryService;
 import com.app.service.evaluateservice.IEvaluateService;
@@ -74,6 +75,10 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
+    @GetMapping("/categories/list")
+    public ResponseEntity<Iterable<Category>> allCategory() {
+        return new ResponseEntity<>(categoryService.findAll(), HttpStatus.OK);
+    }
 
     @PostMapping("/products/create")
     public ResponseEntity<Product> createProduct(@RequestBody Product product){
@@ -102,8 +107,10 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
-
-
+    @GetMapping("/products/list")
+    public ResponseEntity<Iterable<Product>> allProducts() {
+        return new ResponseEntity<>(productService.findAll(), HttpStatus.OK);
+    }
 
     @PostMapping("/shops/create")
     public ResponseEntity<Shop>createShop(@RequestBody Shop shop){
@@ -132,6 +139,20 @@ public class UserController {
             shopService.remove(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+    }
+    @GetMapping("/shops/{id}")
+    public ResponseEntity<Shop> findByUserId(@PathVariable Long id){
+        Optional<Shop> shopOptional = Optional.ofNullable(shopService.findShopByUser_Id(id).get(0));
+        if (!shopOptional.isPresent()||shopOptional==null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }else {
+            return new ResponseEntity<>(shopOptional.get(), HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("/shops/products/{id}")
+    public ResponseEntity<Iterable<Product>> ShopProducts(@PathVariable Long id) {
+        return new ResponseEntity<>(productService.findProductByShop(id), HttpStatus.OK);
     }
 
 
@@ -264,4 +285,24 @@ public class UserController {
         orderService.remove(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<SearchDto> searchProduct(@RequestParam(value = "searchname") String searchname) {
+        SearchDto searchDto = new SearchDto();
+        searchDto.setProductList((List<Product>) productService.searchByName(searchname));
+        searchDto.setShopList((List<Shop>) shopService.searchByName(searchname));
+        System.out.println(searchDto);
+        System.out.println("searcname:"+searchname);
+        return new ResponseEntity<>(searchDto, HttpStatus.OK);
+    }
+//    @PostMapping("/search")
+//    public ResponseEntity<SearchDto> searchProduct(@RequestBody String searchname) {
+//        SearchDto searchDto = new SearchDto();
+//        searchDto.setProductList((List<Product>) productService.searchByName(searchname));
+//        searchDto.setShopList((List<Shop>) shopService.searchByName(searchname));
+//        System.out.println(searchDto);
+//        System.out.println("searcname:"+searchname);
+//        return new ResponseEntity<>(searchDto, HttpStatus.OK);
+//   }
+
 }
