@@ -266,13 +266,18 @@ public class UserController {
     }
 
     @DeleteMapping("/orders/delete/{id}")
-    public ResponseEntity<Order>deleteOrder(@PathVariable Long id){
+    public ResponseEntity<?>deleteOrder(@PathVariable Long id){
         Optional<Order>orderOptional=orderService.findById(id);
-        if(!orderOptional.isPresent()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if(orderOptional.get().getStatus().equals("Đã nhận")){
+            return new ResponseEntity<>(new MessageResponse("Không thể huy đơn đã nhận"),HttpStatus.NOT_FOUND);
         }
-        orderService.remove(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        if(orderOptional.get().getStatus().equals("Đang giao")){
+            orderOptional.get().setStatus("Đã huỷ");
+           Order order = orderService.save(orderOptional.get());
+            return new ResponseEntity<>(new MessageResponse("Huỷ đơn thành công"),HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(new MessageResponse("Không thấy đơn"),HttpStatus.NOT_FOUND);
     }
     @GetMapping("/findOrderByUser/{userName}")
     public ResponseEntity<?> findOrderByUser(@PathVariable String userName){
