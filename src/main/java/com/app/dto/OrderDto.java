@@ -17,6 +17,21 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderDto {
     private Long id;
+
+    @Override
+    public String toString() {
+        return "OrderDto{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", address='" + address + '\'' +
+                ", createTime=" + createTime +
+                ", endTime=" + endTime +
+                ", status='" + status + '\'' +
+                ", orderDetailList=" + orderDetailList +
+                ", user=" + user +
+                '}';
+    }
+
     private String description;
     private String address;
     private Date createTime;

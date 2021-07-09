@@ -5,6 +5,7 @@ import com.app.dto.ProductForm;
 import com.app.dto.request.BuyOrderRequest;
 import com.app.dto.request.CreateCartRequest;
 import com.app.dto.request.CreateCartRequest;
+import com.app.dto.request.CreateShopRequest;
 import com.app.entity.*;
 import com.app.security.MessageResponse;
 import com.app.service.categoryservice.ICategoryService;
@@ -113,8 +114,12 @@ public class UserController {
 
 
     @PostMapping("/shops/create")
-    public ResponseEntity<Shop>createShop(@RequestBody Shop shop){
-        shopService.save(shop);
+    public ResponseEntity<Shop>createShop(@RequestBody CreateShopRequest shop){
+        Optional<User> user = userService.findByUserName(shop.getUserName());
+        Shop newShop = new Shop();
+        newShop.setName(shop.getShopName());
+        newShop.setUser(user.get());
+        shopService.save(newShop);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -290,6 +295,7 @@ public class UserController {
 //        Iterable<OrderDetail> orderDetails = orderDetailService.findAllByOrder(order);
 //        return new ResponseEntity<>(orderDetails,HttpStatus.OK);
         OrderDto orderDto = appMapper.orderToOrderDTO(order);
+        System.out.println(orderDto);
         return new ResponseEntity<>(orderDto,HttpStatus.OK);
     }
 
@@ -329,4 +335,16 @@ public class UserController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @GetMapping("/shop/check/{userName}")
+    public ResponseEntity<?> checkShopByUser(@PathVariable String userName){
+        List<Shop> shop = (List<Shop>) shopService.finAllByUser(userService.findByUserName(userName).get());
+        if(shop.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }
+        else {
+            return new ResponseEntity<>(shop.get(0),HttpStatus.OK);
+        }
+    }
+
 }
