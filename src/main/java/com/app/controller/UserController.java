@@ -77,23 +77,20 @@ public class UserController {
     }
 
     @PostMapping("/products/create")
-    public ResponseEntity<Product> createProduct(@RequestBody ProductForm productForm){
+    public ResponseEntity<Product> createProduct(@ModelAttribute ProductForm productForm){
         Product product = productService.converter(productForm);
         productService.save(product);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("/products/edit/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product){
-        Optional<Product> productOptional = productService.findById(id);
-        if(!productOptional.isPresent()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }else {
-            product.setId(productOptional.get().getId());
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @ModelAttribute ProductForm productForm){
+            productForm.setId(id);
+            Product product = productService.converter(productForm);
             productService.save(product);
             return new ResponseEntity<>(HttpStatus.OK);
-        }
     }
+
     @DeleteMapping("/products/delete/{id}")
     public ResponseEntity<Product> deleteProduct(@PathVariable Long id) {
         Optional<Product> productOptional = productService.findById(id);

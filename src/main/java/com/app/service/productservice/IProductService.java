@@ -7,7 +7,7 @@ import com.app.service.IGeneralService;
 
 public interface IProductService extends IGeneralService<Product> {
      Iterable<Product> findAllByCategory(Category category);
-
      Product converter(ProductForm productForm);
+     Iterable<Product> findAllProductByName(String name);
 }
 

@@ -153,5 +153,14 @@ public class HomeController {
         }
         return new ResponseEntity<>(orderOptional.get(),HttpStatus.OK);
     }
+
+    @GetMapping("/products/findname/{name}")
+    public ResponseEntity<Iterable<Product>> findProductByName(@PathVariable String name){
+        List <Product> productList = (List<Product>) productService.findAllProductByName(name);
+        if(productList.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(productList,HttpStatus.OK);
+    }
 }
 
