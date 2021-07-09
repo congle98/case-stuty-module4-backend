@@ -1,8 +1,14 @@
 package com.app.controller;
 
+import com.app.dto.OrderDto;
+import com.app.dto.ProductForm;
+import com.app.dto.request.BuyOrderRequest;
+import com.app.dto.request.CreateCartRequest;
 import com.app.dto.request.CreateCartRequest;
 import com.app.dto.SearchDto;
+import com.app.dto.request.CreateShopRequest;
 import com.app.entity.*;
+import com.app.security.MessageResponse;
 import com.app.service.categoryservice.ICategoryService;
 import com.app.service.evaluateservice.IEvaluateService;
 import com.app.service.orderdetailservice.IOrderDetailService;
@@ -10,11 +16,13 @@ import com.app.service.orderservice.IOrderService;
 import com.app.service.productservice.IProductService;
 import com.app.service.shopservice.IShopService;
 import com.app.service.userservice.IUserService;
+import com.app.utils.AppMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +52,9 @@ public class UserController {
 
     @Autowired
     private IUserService userService;
+
+    @Autowired
+    private AppMapper appMapper;
 
 
     @PostMapping("/categories/create")
@@ -81,22 +92,20 @@ public class UserController {
     }
 
     @PostMapping("/products/create")
-    public ResponseEntity<Product> createProduct(@RequestBody Product product){
+    public ResponseEntity<Product> createProduct(@ModelAttribute ProductForm productForm){
+        Product product = productService.converter(productForm);
         productService.save(product);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("/products/edit/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product){
-        Optional<Product> productOptional = productService.findById(id);
-        if(!productOptional.isPresent()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }else {
-            product.setId(productOptional.get().getId());
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @ModelAttribute ProductForm productForm){
+            productForm.setId(id);
+            Product product = productService.converter(productForm);
             productService.save(product);
             return new ResponseEntity<>(HttpStatus.OK);
-        }
     }
+
     @DeleteMapping("/products/delete/{id}")
     public ResponseEntity<Product> deleteProduct(@PathVariable Long id) {
         Optional<Product> productOptional = productService.findById(id);
@@ -113,8 +122,12 @@ public class UserController {
     }
 
     @PostMapping("/shops/create")
-    public ResponseEntity<Shop>createShop(@RequestBody Shop shop){
-        shopService.save(shop);
+    public ResponseEntity<Shop>createShop(@RequestBody CreateShopRequest shop){
+        Optional<User> user = userService.findByUserName(shop.getUserName());
+        Shop newShop = new Shop();
+        newShop.setName(shop.getShopName());
+        newShop.setUser(user.get());
+        shopService.save(newShop);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -277,14 +290,85 @@ public class UserController {
     }
 
     @DeleteMapping("/orders/delete/{id}")
-    public ResponseEntity<Order>deleteOrder(@PathVariable Long id){
+    public ResponseEntity<?>deleteOrder(@PathVariable Long id){
         Optional<Order>orderOptional=orderService.findById(id);
-        if(!orderOptional.isPresent()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if(orderOptional.get().getStatus().equals("Đã nhận")){
+            return new ResponseEntity<>(new MessageResponse("Không thể huy đơn đã nhận"),HttpStatus.NOT_FOUND);
         }
-        orderService.remove(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        if(orderOptional.get().getStatus().equals("Đang giao")){
+            orderOptional.get().setStatus("Đã huỷ");
+           Order order = orderService.save(orderOptional.get());
+            return new ResponseEntity<>(new MessageResponse("Huỷ đơn thành công"),HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(new MessageResponse("Không thấy đơn"),HttpStatus.NOT_FOUND);
     }
+    @GetMapping("/findOrderByUser/{userName}")
+    public ResponseEntity<?> findOrderByUser(@PathVariable String userName){
+        Optional<User> user = userService.findByUserName(userName);
+        Iterable<Order> orders = orderService.findAllByUser(user.get());
+        Order order = new Order();
+        for (Order o: orders
+             ) {
+            if(o.getStatus().equals("Giỏ hàng")){
+                order = o;
+            }
+        }
+//        Iterable<OrderDetail> orderDetails = orderDetailService.findAllByOrder(order);
+//        return new ResponseEntity<>(orderDetails,HttpStatus.OK);
+        OrderDto orderDto = appMapper.orderToOrderDTO(order);
+        System.out.println(orderDto);
+        return new ResponseEntity<>(orderDto,HttpStatus.OK);
+    }
+
+    @PutMapping("/orders/buy")
+    public ResponseEntity<?> orderBy(@RequestBody BuyOrderRequest buyOrderRequest){
+        if(buyOrderRequest.getAddress().equals("")){
+            return new ResponseEntity<>(new MessageResponse("phải có địa chỉ mới giao hàng dc chứ"),HttpStatus.NOT_FOUND);
+        }
+        Optional<Order> order = orderService.findById(buyOrderRequest.getId());
+        order.get().setAddress(buyOrderRequest.getAddress());
+        order.get().setDescription(buyOrderRequest.getDescription());
+        order.get().setStatus("Đang giao");
+        orderService.save(order.get());
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
+    @GetMapping("/findAllOrderByUser/{userName}")
+    public ResponseEntity<?> findAllOrderByUser(@PathVariable String userName){
+        List<Order> orders = (List<Order>) orderService.findAllByUser(userService.findByUserName(userName).get());
+        List<OrderDto> orderDtos = new ArrayList<>();
+        for (Order o: orders
+             ) {
+            if(!o.getStatus().equals("Giỏ hàng")){
+                orderDtos.add(appMapper.orderToOrderDTO(o));
+            }
+        }
+        return new ResponseEntity<>(orderDtos,HttpStatus.OK);
+    }
+    @PutMapping("/orders/changeStatus/{id}")
+    public ResponseEntity<?> changeStatusOrder(@PathVariable Long id){
+        Optional<Order> order = orderService.findById(id);
+        if (order.get().getStatus().equals("Đang giao")){
+            order.get().setStatus("Đã nhận");
+            orderService.save(order.get());
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/shop/check/{userName}")
+    public ResponseEntity<?> checkShopByUser(@PathVariable String userName){
+        List<Shop> shop = (List<Shop>) shopService.finAllByUser(userService.findByUserName(userName).get());
+        if(shop.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }
+        else {
+            return new ResponseEntity<>(shop.get(0),HttpStatus.OK);
+        }
+    }
+
 
     @GetMapping("/search")
     public ResponseEntity<SearchDto> searchProduct(@RequestParam(value = "searchname") String searchname) {

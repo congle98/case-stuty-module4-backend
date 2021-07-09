@@ -17,8 +17,9 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "*", maxAge = 3600)
+
 @RequestMapping("/api/home")
+@CrossOrigin(origins = "*")
 public class HomeController {
     @Autowired
     private ICategoryService categoryService;
@@ -151,6 +152,15 @@ public class HomeController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(orderOptional.get(),HttpStatus.OK);
+    }
+
+    @GetMapping("/products/findname/{name}")
+    public ResponseEntity<Iterable<Product>> findProductByName(@PathVariable String name){
+        List <Product> productList = (List<Product>) productService.findAllProductByName(name);
+        if(productList.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(productList,HttpStatus.OK);
     }
 }
 
