@@ -14,7 +14,9 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     Iterable<Product> findAllByCategory(Category category);
     List<Product> findByNameContaining(String name);
     @Query(nativeQuery = true,value = "select * from products where shop_id = ?")
-    List<Product> findProductByShop_Id(Long id);
+    Iterable<Product> findProductByShop_Id(Long id);
 
     Iterable<Product> findProductByName(String name);
+
+
 }

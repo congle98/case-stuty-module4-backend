@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductForm {
-    private Long id;
+    private Long shopId;
 
     private String name;
 
@@ -19,10 +19,55 @@ public class ProductForm {
 
     private double salePrice;
 
-    private MultipartFile avatar;
+//    private MultipartFile avatar;
 
-    private Category category;
+    private String category;
 
-    private Shop shop;
+    public Long getShopId() {
+        return shopId;
+    }
 
+    public void setShopId(Long shopId) {
+        this.shopId = shopId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public double getSalePrice() {
+        return salePrice;
+    }
+
+    public void setSalePrice(double salePrice) {
+        this.salePrice = salePrice;
+    }
+//
+//    public MultipartFile getAvatar() {
+//        return avatar;
+//    }
+//
+//    public void setAvatar(MultipartFile avatar) {
+//        this.avatar = avatar;
+//    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
 }

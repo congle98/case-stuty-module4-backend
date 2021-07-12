@@ -4,6 +4,8 @@ import com.app.dto.ProductForm;
 import com.app.entity.Category;
 import com.app.entity.Product;
 import com.app.repository.ProductRepository;
+import com.app.service.categoryservice.CategoryService;
+import com.app.service.shopservice.ShopService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,10 @@ public class ProductService implements IProductService {
     Environment environment;
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    ShopService shopService;
+    @Autowired
+    CategoryService categoryService;
     @Override
     public Iterable<Product> findAll() {
         return productRepository.findAll();
@@ -54,27 +60,26 @@ public class ProductService implements IProductService {
         return productRepository.findProductByShop_Id(id);
     }
 
-    @Override
-    public Product converter(ProductForm productForm) {
-
-        MultipartFile multipartFile = productForm.getAvatar();
-        String fileName = multipartFile.getOriginalFilename();
-        String fileUpload = environment.getProperty("upload.path").toString();
-        try {
-            FileCopyUtils.copy(multipartFile.getBytes(),new File(fileUpload + fileName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Product product = new Product();
-        product.setId(productForm.getId());
-        product.setShop(product.getShop());
-        product.setCategory(productForm.getCategory());
-        product.setName(productForm.getName());
-        product.setPrice(productForm.getPrice());
-        product.setSalePrice(productForm.getSalePrice());
-        product.setAvatar(fileName);
-        return product;
-    }
+//    @Override
+//    public Product converter(ProductForm productForm) {
+//
+//        MultipartFile multipartFile = productForm.getAvatar();
+//        String fileName = multipartFile.getOriginalFilename();
+//        String fileUpload = environment.getProperty("upload.path").toString();
+//        try {
+//            FileCopyUtils.copy(multipartFile.getBytes(),new File(fileUpload + fileName));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        Product product = new Product();
+//        product.setShop(shopService.findById(productForm.getShopId()).get());
+//        product.setCategory(categoryService.findByName(productForm.getCategory()).get());
+//        product.setName(productForm.getName());
+//        product.setPrice(productForm.getPrice());
+//        product.setSalePrice(productForm.getSalePrice());
+//        product.setAvatar(fileName);
+//        return product;
+//    }
 
     @Override
     public Iterable<Product> findAllProductByName(String name) {

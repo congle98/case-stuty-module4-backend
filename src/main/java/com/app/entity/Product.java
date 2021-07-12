@@ -17,6 +17,9 @@ public class Product {
 
     private String avatar;
 
+    @Column(columnDefinition = "boolean default true")
+    private boolean status = true;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
@@ -24,6 +27,14 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "shop_id")
     private Shop shop;
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
 
     public Long getId() {
         return id;

@@ -12,7 +12,7 @@ public interface IProductService extends IGeneralService<Product> {
     Iterable<Product> searchByName(String name);
     Iterable<Product> findProductByShop(Long id);
 
-     Product converter(ProductForm productForm);
+//     Product converter(ProductForm productForm);
      Iterable<Product> findAllProductByName(String name);
 }
 

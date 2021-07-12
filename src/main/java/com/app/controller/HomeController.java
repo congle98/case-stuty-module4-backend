@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,10 +78,21 @@ public class HomeController {
     @GetMapping("/products/list")
     public ResponseEntity<Iterable<Product>> showAllProducts(){
         List<Product> productList = (List<Product>) productService.findAll();
+        List<Product> productListRespon = new ArrayList<>();
+
         if(productList.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(productList,HttpStatus.OK);
+        else {
+            for (Product product: productList
+                 ) {
+                if (product.isStatus()==true){
+                    productListRespon.add(product);
+                }
+            }
+            return new ResponseEntity<>(productListRespon,HttpStatus.OK);
+        }
+
     }
 
     @GetMapping("/shops/list")

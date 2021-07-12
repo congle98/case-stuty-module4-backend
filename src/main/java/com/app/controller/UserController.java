@@ -7,6 +7,7 @@ import com.app.dto.request.CreateCartRequest;
 import com.app.dto.request.CreateCartRequest;
 import com.app.dto.SearchDto;
 import com.app.dto.request.CreateShopRequest;
+import com.app.dto.respond.ProductSetAvtForm;
 import com.app.entity.*;
 import com.app.security.MessageResponse;
 import com.app.service.categoryservice.ICategoryService;
@@ -18,10 +19,15 @@ import com.app.service.shopservice.IShopService;
 import com.app.service.userservice.IUserService;
 import com.app.utils.AppMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,6 +38,8 @@ import java.util.Optional;
 @RequestMapping("/api/user")
 
 public class UserController {
+    @Autowired
+    Environment environment;
     @Autowired
     private ICategoryService categoryService;
 
@@ -92,28 +100,43 @@ public class UserController {
     }
 
     @PostMapping("/products/create")
-    public ResponseEntity<Product> createProduct(@ModelAttribute ProductForm productForm){
-        Product product = productService.converter(productForm);
+    public ResponseEntity<Product> createProduct(@RequestBody ProductForm productForm){
+        Optional<Shop> shop = shopService.findById(productForm.getShopId());
+        Optional<Category> category = categoryService.findByName(productForm.getCategory());
+        Product product = new Product();
+        product.setName(productForm.getName());
+        product.setPrice(productForm.getPrice());
+        product.setSalePrice(productForm.getSalePrice());
+        product.setCategory(category.get());
+        product.setShop(shop.get());
+
+//        Product product = productService.converter(productForm);
         productService.save(product);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PutMapping("/products/edit/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @ModelAttribute ProductForm productForm){
-            productForm.setId(id);
-            Product product = productService.converter(productForm);
-            productService.save(product);
-            return new ResponseEntity<>(HttpStatus.OK);
-    }
+//    @PutMapping("/products/edit/{id}")
+//    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @ModelAttribute ProductForm productForm){
+//            productForm.setId(id);
+//            Product product = productService.converter(productForm);
+//            productService.save(product);
+//            return new ResponseEntity<>(HttpStatus.OK);
+//    }
 
     @DeleteMapping("/products/delete/{id}")
-    public ResponseEntity<Product> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
         Optional<Product> productOptional = productService.findById(id);
         if (!productOptional.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            productService.remove(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            if(productOptional.get().isStatus()){
+                productOptional.get().setStatus(false);
+            }
+            else {
+                productOptional.get().setStatus(true);
+            }
+            productService.save(productOptional.get());
+            return new ResponseEntity<>(new MessageResponse("Xoá sản phẩm thành công"),HttpStatus.NO_CONTENT);
         }
     }
     @GetMapping("/products/list")
@@ -370,8 +393,8 @@ public class UserController {
     }
 
 
-    @GetMapping("/search")
-    public ResponseEntity<SearchDto> searchProduct(@RequestParam(value = "searchname") String searchname) {
+    @GetMapping("/search/{searchname}")
+    public ResponseEntity<SearchDto> searchProduct(@PathVariable String searchname) {
         SearchDto searchDto = new SearchDto();
         searchDto.setProductList((List<Product>) productService.searchByName(searchname));
         searchDto.setShopList((List<Shop>) shopService.searchByName(searchname));
@@ -388,5 +411,28 @@ public class UserController {
 //        System.out.println("searcname:"+searchname);
 //        return new ResponseEntity<>(searchDto, HttpStatus.OK);
 //   }
+
+    @GetMapping("/findAllProductByShop/{shopId}")
+    public ResponseEntity<?> findAllProductByShop(@PathVariable Long shopId){
+        List<Product> products = (List<Product>) productService.findProductByShop(shopId);
+        return  new ResponseEntity<>(products,HttpStatus.OK);
+    }
+
+    @PutMapping("products/setAvatar/{productId}")
+    public ResponseEntity<?> setAvatarProduct( @RequestParam("files") MultipartFile[] uploadfiles,@PathVariable Long productId){
+        System.out.println(uploadfiles[0].getName());
+        MultipartFile multipartFile = uploadfiles[0];
+        String fileName = multipartFile.getOriginalFilename();
+        String fileUpload = environment.getProperty("upload.path").toString();
+        try {
+            FileCopyUtils.copy(multipartFile.getBytes(),new File(fileUpload + fileName));
+            Optional<Product> product = productService.findById(productId);
+            product.get().setAvatar(fileName);
+            productService.save(product.get());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
 }
